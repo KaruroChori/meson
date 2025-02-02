@@ -79,6 +79,7 @@ defaults['cuda_static_linker'] = ['nvlink']
 defaults['gcc_static_linker'] = ['gcc-ar']
 defaults['clang_static_linker'] = ['llvm-ar']
 defaults['nasm'] = ['nasm', 'yasm']
+defaults['c3'] = ['c3c']
 
 
 def compiler_from_language(env: 'Environment', lang: str, for_machine: MachineChoice) -> T.Optional[Compiler]:
@@ -99,6 +100,7 @@ def compiler_from_language(env: 'Environment', lang: str, for_machine: MachineCh
         'nasm': detect_nasm_compiler,
         'masm': detect_masm_compiler,
         'linearasm': detect_linearasm_compiler,
+        'c3': detect_c3_compiler,
     }
     return lang_map[lang](env, for_machine) if lang in lang_map else None
 
@@ -1400,6 +1402,33 @@ def detect_linearasm_compiler(env: Environment, for_machine: MachineChoice) -> C
         popen_exceptions[' '.join(comp + [arg])] = e
     _handle_exceptions(popen_exceptions, [comp])
     raise EnvironmentException('Unreachable code (exception to make mypy happy)')
+
+def detect_c3_compiler(env: 'Environment', for_machine: MachineChoice) -> Compiler:
+    from .c3c import C3Compiler
+    exelist = env.lookup_binary_entry(for_machine, 'c3c')
+    is_cross = env.is_cross_build(for_machine)
+    info = env.machines[for_machine]
+    if exelist is None:
+        # TODO support fallback
+        exelist = [defaults['c3c'][0]]
+
+    try:
+        p, _, err = Popen_safe_logged(exelist + ['-v'], msg='Detecting compiler via')
+    except OSError:
+        raise EnvironmentException('Could not execute C3C compiler: {}'.format(join_args(exelist)))
+    version = search_version(err)
+    if 'Swift' in err:
+        # As for 5.0.1 swiftc *requires* a file to check the linker:
+        with tempfile.NamedTemporaryFile(suffix='.swift') as f:
+            cls = SwiftCompiler
+            linker = guess_nix_linker(env,
+                                      exelist, cls, version, for_machine,
+                                      extra_args=[f.name, '-o', '/dev/null'])
+        return cls(
+            exelist, version, for_machine, is_cross, info, linker=linker)
+
+    raise EnvironmentException('Unknown compiler: ' + join_args(exelist))
+
 
 # GNU/Clang defines and version
 # =============================
