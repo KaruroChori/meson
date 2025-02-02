@@ -22,12 +22,15 @@ if T.TYPE_CHECKING:
 
 swift_optimization_args: T.Dict[str, T.List[str]] = {
     'plain': [],
-    '0': [],
-    'g': [],
-    '1': ['-O'],
-    '2': ['-O'],
-    '3': ['-O'],
-    's': ['-O'],
+    '0': ['-O0'],
+    'g': ['-Og'],
+    '1': ['-O1'],
+    '2': ['-O2'],
+    '3': ['-O3'],
+    's': ['-Os'],
+    '4': ['-O4'],
+    '5': ['-O5'],
+    'z': ['-Oz'],
 }
 
 class C3Compiler(Compiler):
