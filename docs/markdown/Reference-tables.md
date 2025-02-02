@@ -233,6 +233,7 @@ to your build target.
 | NASM          | nasm_args      | N/A               |
 | MASM          | masm_args      | N/A               |
 | Linear ASM    | linearasm_args | N/A               |
+| C3            | c3c_args       | c3c_link_args     |
 
 All these `<lang>_*` options are specified per machine. See in
 [specifying options per
@@ -262,6 +263,7 @@ arguments](#language-arguments-parameter-names) instead.
 | RUSTFLAGS   | Flags for the Rust compiler              |
 | CYTHONFLAGS | Flags for the Cython compiler            |
 | LDFLAGS     | The linker flags, used for all languages |
+| C3CLAGS     | Flags for the C3C compiler               |
 
 N.B. these settings are specified per machine, and so the environment
 variables actually come in pairs. See the [environment variables per
@@ -391,6 +393,7 @@ machine](#Environment-variables-per-machine) section for details.
 | Cython        | CYTHON   |           |                                             |
 | nasm          | NASM     |           | Uses the C linker                           |
 | archiver      |          | AR        |                                             |
+| C3            | C3C      | C3C_LD    |                                             |
 
 *The old environment variables are still supported, but are deprecated
 and will be removed in a future version of Meson.

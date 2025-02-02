@@ -98,6 +98,7 @@ ENV_VAR_COMPILER_MAP: T.Mapping[str, str] = {
     'rust': 'RUSTC',
     'vala': 'VALAC',
     'nasm': 'NASM',
+    'c3': 'C3C',
 
     # Linkers
     'c_ld': 'CC_LD',
@@ -107,6 +108,7 @@ ENV_VAR_COMPILER_MAP: T.Mapping[str, str] = {
     'objc_ld': 'OBJC_LD',
     'objcpp_ld': 'OBJCXX_LD',
     'rust_ld': 'RUSTC_LD',
+    'c3_ld': 'C3C_LD',
 }
 
 # Map from utility names to environment variables.

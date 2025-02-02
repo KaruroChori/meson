@@ -44,7 +44,7 @@ if T.TYPE_CHECKING:
 about. To support a new compiler, add its information below.
 Also add corresponding autodetection code in detect.py."""
 
-header_suffixes = {'h', 'hh', 'hpp', 'hxx', 'H', 'ipp', 'moc', 'vapi', 'di'}
+header_suffixes = {'h', 'hh', 'hpp', 'hxx', 'H', 'ipp', 'moc', 'vapi', 'di', 'c3i'}
 obj_suffixes = {'o', 'obj', 'res'}
 # To the emscripten compiler, .js files are libraries
 lib_suffixes = {'a', 'lib', 'dll', 'dll.a', 'dylib', 'so', 'js'}
@@ -70,6 +70,7 @@ lang_suffixes: T.Mapping[str, T.Tuple[str, ...]] = {
     'nasm': ('asm', 'nasm',),
     'masm': ('masm',),
     'linearasm': ('sa',),
+    'c3': ('c3','c3i')
 }
 all_languages = lang_suffixes.keys()
 c_cpp_suffixes = {'h'}
