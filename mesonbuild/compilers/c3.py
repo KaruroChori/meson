@@ -20,7 +20,7 @@ if T.TYPE_CHECKING:
     from ..linkers.linkers import DynamicLinker
     from ..mesonlib import MachineChoice
 
-swift_optimization_args: T.Dict[str, T.List[str]] = {
+c3_optimization_args: T.Dict[str, T.List[str]] = {
     'plain': [],
     '0': ['-O0'],
     'g': ['-Og'],
@@ -35,7 +35,7 @@ swift_optimization_args: T.Dict[str, T.List[str]] = {
 
 class C3Compiler(Compiler):
 
-    LINKER_PREFIX = ['compile','--no-entry','-z']
+    LINKER_PREFIX = ['compile','--linker=builtin','--no-entry','-z']    # Temporary fix for now. The linker should not require builtin to work but well...
     language = 'c3'
     id = 'llvm'
 
@@ -68,29 +68,17 @@ class C3Compiler(Compiler):
         return True
 
     def get_werror_args(self) -> T.List[str]:
-        return ['-warnings-as-errors']
+        return []
 
     def get_dependency_gen_args(self, outtarget: str, outfile: str) -> T.List[str]:
-        return ['-emit-dependencies']
+        return []   #TODO:c3c I need to check if there is something like that supported in here
 
     def get_dependency_compile_args(self, dep: Dependency) -> T.List[str]:
-        args = dep.get_compile_args()
-        # Some deps might sneak in a hardcoded path to an older macOS SDK, which can
-        # cause compilation errors. Let's replace all .sdk paths with the current one.
-        # SwiftPM does it this way: https://github.com/swiftlang/swift-package-manager/pull/6772
-        # Not tested on anything else than macOS for now.
-        if not self.info.is_darwin():
-            return args
-        pattern = re.compile(r'.*\/MacOSX[^\/]*\.sdk(\/.*|$)')
-        for i, arg in enumerate(args):
-            if arg.startswith('-I'):
-                match = pattern.match(arg)
-                if match:
-                    args[i] = '-I' + self.sdk_path + match.group(1)
-        return args
+        return []
 
     def depfile_for_object(self, objfile: str) -> T.Optional[str]:
-        return os.path.splitext(objfile)[0] + '.' + self.get_depfile_suffix()
+        #return os.path.splitext(objfile)[0] + '.' + self.get_depfile_suffix()
+        return None
 
     def get_depfile_suffix(self) -> str:
         return 'd'
@@ -98,26 +86,17 @@ class C3Compiler(Compiler):
     def get_output_args(self, target: str) -> T.List[str]:
         return ['-o', target]
 
-    def get_header_import_args(self, headername: str) -> T.List[str]:
-        return ['-import-objc-header', headername]
-
     def get_warn_args(self, level: str) -> T.List[str]:
         return []
 
     def get_std_exe_link_args(self) -> T.List[str]:
-        return ['-emit-executable']
-
-    def get_module_args(self, modname: str) -> T.List[str]:
-        return ['-module-name', modname]
-
-    def get_mod_gen_args(self) -> T.List[str]:
-        return ['-emit-module']
+        return []
 
     def get_include_args(self, path: str, is_system: bool) -> T.List[str]:
-        return ['-I' + path]
+        return ['--libdir' , path]
 
     def get_compile_only_args(self) -> T.List[str]:
-        return ['-c']
+        return ['compile-only']
 
     def compute_parameters_with_absolute_paths(self, parameter_list: T.List[str],
                                                build_dir: str) -> T.List[str]:
@@ -138,20 +117,20 @@ class C3Compiler(Compiler):
         else:
             extra_flags += environment.coredata.get_external_link_args(self.for_machine, self.language)
         with open(source_name, 'w', encoding='utf-8') as ofile:
-            ofile.write('''print("Swift compilation is working.")
+            ofile.write('''fn int main(){return 0;}
 ''')
-        pc = subprocess.Popen(self.exelist + extra_flags + ['-emit-executable', '-o', output_name, src], cwd=work_dir)
+        pc = subprocess.Popen(self.exelist + extra_flags + ['compile', src, '-o', output_name], cwd=work_dir)
         pc.wait()
         if pc.returncode != 0:
-            raise EnvironmentException('Swift compiler %s cannot compile programs.' % self.name_string())
+            raise EnvironmentException('C3 compiler %s cannot compile programs.' % self.name_string())
         if self.is_cross:
             # Can't check if the binaries run so we have to assume they do
             return
         if subprocess.call(output_name) != 0:
-            raise EnvironmentException('Executables created by Swift compiler %s are not runnable.' % self.name_string())
+            raise EnvironmentException('Executables created by C3 compiler %s are not runnable.' % self.name_string())
 
     def get_debug_args(self, is_debug: bool) -> T.List[str]:
         return clike_debug_args[is_debug]
 
     def get_optimization_args(self, optimization_level: str) -> T.List[str]:
-        return swift_optimization_args[optimization_level]
+        return c3_optimization_args[optimization_level]
