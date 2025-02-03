@@ -83,7 +83,7 @@ source_suffixes = all_suffixes - header_suffixes
 # List of languages that by default consume and output libraries following the
 # C ABI; these can generally be used interchangeably
 # This must be sorted, see sort_clink().
-clib_langs = ('objcpp', 'cpp', 'objc', 'c', 'nasm', 'fortran')
+clib_langs = ('objcpp', 'cpp', 'objc', 'c', 'nasm', 'fortran', 'c3')
 # List of languages that can be linked with C code directly by the linker
 # used in build.py:process_compilers() and build.py:get_dynamic_linker()
 # This must be sorted, see sort_clink().
@@ -93,7 +93,7 @@ SUFFIX_TO_LANG = dict(itertools.chain(*(
     [(suffix, lang) for suffix in v] for lang, v in lang_suffixes.items())))
 
 # Languages that should use LDFLAGS arguments when linking.
-LANGUAGES_USING_LDFLAGS = {'objcpp', 'cpp', 'objc', 'c', 'fortran', 'd', 'cuda'}
+LANGUAGES_USING_LDFLAGS = {'objcpp', 'cpp', 'objc', 'c', 'fortran', 'd', 'cuda', 'c3'}
 # Languages that should use CPPFLAGS arguments when linking.
 LANGUAGES_USING_CPPFLAGS = {'c', 'cpp', 'objc', 'objcpp'}
 soregex = re.compile(r'.*\.so(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?$')
@@ -111,6 +111,7 @@ CFLAGS_MAPPING: T.Mapping[str, str] = {
     'rust': 'RUSTFLAGS',
     'cython': 'CYTHONFLAGS',
     'cs': 'CSFLAGS', # This one might not be standard.
+    'c3c': 'C3CFLAGS'
 }
 
 # All these are only for C-linkable languages; see `clink_langs` above.

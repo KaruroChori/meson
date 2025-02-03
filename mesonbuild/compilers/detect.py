@@ -1404,26 +1404,27 @@ def detect_linearasm_compiler(env: Environment, for_machine: MachineChoice) -> C
     raise EnvironmentException('Unreachable code (exception to make mypy happy)')
 
 def detect_c3_compiler(env: 'Environment', for_machine: MachineChoice) -> Compiler:
-    from .c3c import C3Compiler
+    from .c3 import C3Compiler
     exelist = env.lookup_binary_entry(for_machine, 'c3c')
     is_cross = env.is_cross_build(for_machine)
     info = env.machines[for_machine]
     if exelist is None:
         # TODO support fallback
-        exelist = [defaults['c3c'][0]]
+        exelist = [defaults['c3'][0]]
 
     try:
-        p, _, err = Popen_safe_logged(exelist + ['-v'], msg='Detecting compiler via')
+        p, out, _ = Popen_safe_logged(exelist + ['-V'], msg='Detecting compiler via')
     except OSError:
         raise EnvironmentException('Could not execute C3C compiler: {}'.format(join_args(exelist)))
-    version = search_version(err)
-    if 'Swift' in err:
+    version = search_version(out)
+    if 'C3' in out:
         # As for 5.0.1 swiftc *requires* a file to check the linker:
-        with tempfile.NamedTemporaryFile(suffix='.swift') as f:
-            cls = SwiftCompiler
+        with tempfile.NamedTemporaryFile(suffix='.c3') as f:
+            cls = C3Compiler
             linker = guess_nix_linker(env,
                                       exelist, cls, version, for_machine,
                                       extra_args=[f.name, '-o', '/dev/null'])
+            print("linkerrrrrr")
         return cls(
             exelist, version, for_machine, is_cross, info, linker=linker)
 

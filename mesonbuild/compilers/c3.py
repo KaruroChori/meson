@@ -35,7 +35,7 @@ swift_optimization_args: T.Dict[str, T.List[str]] = {
 
 class C3Compiler(Compiler):
 
-    LINKER_PREFIX = ['-Xlinker']
+    LINKER_PREFIX = ['compile','--no-entry','-z']
     language = 'c3'
     id = 'llvm'
 
