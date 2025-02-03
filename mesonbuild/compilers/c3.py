@@ -109,7 +109,7 @@ class C3Compiler(Compiler):
     def sanity_check(self, work_dir: str, environment: 'Environment') -> None:
         src = 'c3ctest.c3'
         source_name = os.path.join(work_dir, src)
-        output_name = os.path.join(work_dir, 'c3test')
+        output_name = os.path.join(work_dir, 'c3test', 'c3test')
         extra_flags: T.List[str] = []
         extra_flags += environment.coredata.get_external_args(self.for_machine, self.language)
         if self.is_cross:
